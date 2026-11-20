@@ -1,4 +1,4 @@
-= Task Maven
+= Task CMake
 
 > Fenrir ID: `cmake` +
 > Branch: `cmake` +
