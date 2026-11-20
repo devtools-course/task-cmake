@@ -1,0 +1,310 @@
+= Task Maven
+
+> Fenrir ID: `cmake` +
+> Branch: `cmake` +
+> Points: `90`
+
+== Task submission
+
+Put all the files in the `cmake` directory:
+
+[,text,subs="+macros"]
+----
+icon:folder[] ...
+├─ icon:folder[] cmake
+│  ├─ icon:folder[] c-cxx
+│  │  ├─ ...
+│  │  └─ icon:file-text[] CMakeLists.txt
+│  ├─ icon:folder[] dependencies
+│  │  ├─ ...
+│  │  └─ icon:file-text[] CMakeLists.txt
+│  ├─ icon:folder[] includes
+│  │  ├─ ...
+│  │  └─ icon:file-text[] CMakeLists.txt
+│  ├─ icon:folder[] lib
+│  │  ├─ ...
+│  │  └─ icon:file-text[] CMakeLists.txt
+│  ├─ icon:folder[] module
+│  │  ├─ ...
+│  │  └─ icon:file-text[] CMakeLists.txt
+│  ├─ icon:folder[] package
+│  │  ├─ ...
+│  │  └─ icon:file-text[] CMakeLists.txt
+│  └─ icon:folder[] simple
+│     ├─ ...
+│     └─ icon:file-text[] CMakeLists.txt
+└─ icon:folder[] .git
+----
+
+== Simple app (5 points)
+
+Subdirectory: `simple`
+
+Set up the `CMakeLists.txt` file so that `part1.c` is compiled into a `say-hi` binary which must be put into the `bin` directory.
+
+Project structure:
+
+[,text,subs="+macros"]
+----
+icon:folder[] simple
+├─ icon:folder[] bin
+│  └─ icon:file[] say-hi
+└─ icon:file-text[] CMakeLists.txt
+----
+
+Examine the generated Makefile:
+
+- Which compiler has been chosen?
+- Where are all progress messages defined?
+- How are the progress percentages computed?
+
+
+== Multi-language project (5 points)
+
+Subdirectory: `c-cxx`
+
+This time you are to set up the build process for a project that uses C and C++.
+
+The `dependency.c` file uses ANSI C standard.
+
+The resulting binary must be named `c-cross-cxx` and placed in the `bin` directory.
+
+Project structure:
+
+[,text,subs="+macros"]
+----
+icon:folder[] c-cxx
+├─ icon:folder[] bin
+│  └─ icon:file[] c-cross-cxx
+└─ icon:file-text[] CMakeLists.txt
+----
+
+== Headers (10 points)
+
+Subdirectory: `includes`
+
+Many projects avoid using relative `#include` directives. That's why `gcc` and `CMake` allow you to specify the directories where headers can be found.
+
+Execute `cmake --build`. What happens? What are the problems with `lib` and `entities`? Modify _only the headers_ to make the build succeed.
+
+Configure the project so that the headers from `lib` and `entities` can be found in `main.cpp`.
+
+Compile all files inside `entities` into a static library `libanimals.a`.
+
+Compile all files inside `lib` into a static library `libmath.a`.
+
+The resulting binary must be named `parity`.
+
+Project structure:
+
+[,text,subs="+macros"]
+----
+icon:folder[] includes
+├─ icon:folder[] build
+│  ├─ icon:folder[] entities
+│  │  └─ icon:file-archive[] libanimals.a
+│  └─ icon:folder[] lib
+│     └─ icon:file-archive[] libmath.a
+├─ icon:folder[] bin
+│  └─ icon:file[] parity
+└─ icon:file-text[] CMakeLists.txt
+----
+
+== External dependencies (10 points)
+
+Subdirectory: `dependencies`
+
+The sources use `foo` library which sources are stored on https://gitlab.com/lBAH/foolib[GitLab].
+
+Use `FetchContent` to link the library. Note that the project requires version `1.0.0` of the library.
+
+Create an `example` binary from `example.cc`.
+
+== CMake module (15 points)
+
+Subdirectory: `module`
+
+=== Step 1
+
+> Create a simple CMake module with a function
+
+Create a CMake module `Parity` which has a function `IS_EVEN(_)`
+
+The function takes a number and checks whether it is even. The result (`FALSE`/`TRUE`) must be stored in the `CALL_RESULT` variable.
+
+The function must print additional logs:
+
+`-- Checking that <NUMBER> is even` when entering the function
+
+`-- Checking that <NUMBER> is even - Success` on success
+
+`-- Checking that <NUMBER> is even - Failed` on failure
+
+TIP: Use different modes of `MESSAGE()` to achieve the goals.
+
+=== Step 2
+> Set up target dependencies
+
+Create a root `CMakeLists.txt` file with a target `run_all_tests` which does not do anything.
+
+Import `TestRunner` CMake module only (no more includes must be present).
+
+Add a `tests` target to the `run_all_tests` dependencies.
+
+
+Project structure:
+
+[,text,subs="+macros"]
+----
+icon:folder[] module
+├─ icon:folder[] cmake
+│  ├─ ...
+│  └─ icon:file-text[] Parity.txt
+└─ icon:file-text[] CMakeLists.txt
+----
+
+Expected output after running `cmake --build <build-dir> --target run_all_tests` (Some unimportant logs are omitted):
+
+[,text]
+----
+-- Checking that 0 is even
+-- Checking that 0 is even - Success
+-- PASSED >>= 0
+-- Checking that 80 is even
+-- Checking that 80 is even - Success
+-- PASSED >>= 1
+-- Checking that 89 is even
+-- Checking that 89 is even - Failed
+-- PASSED >>= 2
+-- Checking that 3 is even
+-- Checking that 3 is even - Failed
+-- PASSED >>= 3
+----
+
+== Library installation (20 points)
+
+Subdirectory: `lib`
+
+In this part, you will work with a _dynamic-link library_ (aka DLL, aka shared library).
+
+=== Step 1
+> DLL installation
+
+Go to the `lib` directory. You have to build a shared library named `logic` from the sources.
+
+Set up the installation.
+After running `cmake --install _BUILD_DIR_ --prefix _DEST_DIR_`, we expect:
+
+- `logic.hxx` to be in `_DEST_DIR_/include`
+- the library to be in `_DEST_DIR_/lib`
+
+=== Step 2
+> DLL usage
+
+The `_DEST_DIR_` will be passed to cmake via `LIBPATH` option. Use it to locate the library and header files then compile `main.cpp`.
+
+IMPORTANT: It's **strongly forbidden** to use the sources from the `lib` subdirectory, when compiling `logic`!
+
+
+The resulting binary must be named `logic`.
+
+Project structure:
+
+[,text,subs="+macros"]
+----
+icon:folder[] lib
+├─ icon:folder[] lib
+├─ icon:folder[] bin
+│  └─ icon:file[] logic
+└─ icon:file-text[] CMakeLists.txt
+----
+
+== Package installation (25 points)
+
+Subdirectory: `package`
+
+Now, you have to configure the installation and usage of a CMake package.
+
+NOTE: You will implement the core idea of the https://github.com/google/googletest[GoogleTest framework].
+
+=== Step 1
+> Package generation & installation
+
+Go to the `lib` directory. Build a CMake package from the sources.
+
+* Package name is `vecna`
+* Package namespace is `vecna`
+* Package version is `1.0.0`
+
+Package contains two libraries:
+
+- `vecna` (`stranger_things.cc`)
+- `vecna_main` (`vecna_main.cc`)
+
+The `vecna_main` library depends on `vecna`.
+
+The `vecna` library provides a `stranger_things.hh` header.
+
+Set up the installation.
+After running `cmake --install _BUILD_DIR_ --prefix _DEST_DIR_`, we expect:
+
+- `stranger_things.hh` to be in `_DEST_DIR_/include`
+- both libraries to be in `_DEST_DIR_/lib`
+
+The CMake config files are expected to be in `_DEST_DIR_/lib/cmake/vecna`
+
+=== Step 2
+> Package usage
+
+The `_DEST_DIR_` will be passed to cmake via `CMAKE_PREFIX_PATH` variable.
+
+IMPORTANT: It's **strongly forbidden** to use the sources from the subdirectory `lib`, when compiling `main.cpp`!
+
+To verify the build, the following CMakeLists.txt will be used:
+
+[source,cmake]
+----
+CMAKE_MINIMUM_REQUIRED(VERSION 3.11)
+
+PROJECT(part-7)
+
+FIND_PACKAGE(vecna 1.0.0 EXACT REQUIRED)
+
+ADD_EXECUTABLE(tests main.cpp)
+TARGET_LINK_LIBRARIES(tests PRIVATE vecna::vecna vecna::vecna_main)
+----
+
+
+Install directory structure:
+
+[,text,subs="+macros"]
+----
+icon:folder[] DEST_DIR
+├─ icon:folder[] include
+│  └─ icon:file-text[] stranger_things.hh
+└─ icon:folder[] lib
+   ├─ icon:file-archive[] libvecna.a
+   ├─ icon:file-archive[] libvecna_main.a
+   └─ icon:folder[] cmake
+      └─ icon:folder[] vecna
+         ├─ ...
+         └─ icon:file-text[] vecnaConfig.cmake
+----
+
+== Questions
+* What is an _interface library_ in CMake?
+* How are CMake targets connected to Make targets?
+* What does CMake do when `FetchContent` is used?
+* File `TestRunner.cmake` uses `$\{CMAKE_COMMAND} -D ... -P ...`. What is it?
+* Where does CMake search for packages when `FIND_PACKAGE` is invoked? What files are expected to be found?
+
+== Copyright
+
+pass:[<i class="fab fa-creative-commons"></i>]
+pass:[<i class="fab fa-creative-commons-by"></i>]
+pass:[<i class="fab fa-creative-commons-nc"></i>]
+pass:[<i class="fab fa-creative-commons-sa"></i>]
+
+The project is licensed under the terms of the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License.
+
+(C) 2026-present *Iwan Kalinin* <mailto:koefic.cien@gmail.com[koefic.cien@gmail.com]>
