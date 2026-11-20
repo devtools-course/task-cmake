@@ -40,7 +40,7 @@ icon:folder[] ...
 
 Subdirectory: `simple`
 
-Set up the `CMakeLists.txt` file so that `part1.c` is compiled into a `say-hi` binary which must be put into the `bin` directory.
+Set up the `CMakeLists.txt` file so that `part1.C` is compiled into a `say-hi` binary which must be put into the `bin` directory.
 
 Project structure:
 
